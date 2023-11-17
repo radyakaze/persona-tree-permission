@@ -1,4 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+defineOptions({ name: 'Tree' })
+
 const props = defineProps({
   modelValue: {
     type   : Array as PropType<Array<string | number>>,
@@ -193,7 +195,7 @@ const onCheckbox = (value: boolean, item: T) => {
       Loading
     </div>
   </div>
-  <AclMenuTree
+  <Tree
     v-if="children.length > 0 && !isLoading"
     v-model="model"
     v-model:options="children"

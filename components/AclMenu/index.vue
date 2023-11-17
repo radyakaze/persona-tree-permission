@@ -1,4 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+import Tree from './Tree.vue'
+
 const props = withDefaults(
   defineProps<{
     modelValue?: Array<string | number>,
@@ -77,7 +79,7 @@ onMounted(async () => {
     </div>
   </div>
   <div class="flex">
-    <AclMenuTree
+    <Tree
       v-model="model"
       v-model:options="options"
       :title="title"
