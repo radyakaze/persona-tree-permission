@@ -154,7 +154,7 @@ const onCheckbox = (value: boolean, item: T) => {
   <div class="w-80 h-[500px] overflow-y-auto">
     <div class="flex justify-between p-3 mb-2">
       <div class="font-semibold text-gray-55">
-        {{ treeTitle }} {{ node }}
+        {{ treeTitle }}
       </div>
       <div
         v-if="canSelectAll"
