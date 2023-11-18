@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+import type { UnwrapRef } from 'vue'
 defineOptions({ name: 'Tree' })
 
 const props = defineProps({
@@ -27,8 +28,8 @@ const props = defineProps({
     default: undefined,
   },
   node: {
-    type   : String,
-    default: undefined,
+    type   : Array as PropType<string[]>,
+    default: () => [],
   },
   onFetch: {
     type   : Function as PropType<(params?: T) => Promise<T[]>>,
@@ -36,7 +37,7 @@ const props = defineProps({
   },
 })
 
-const children = ref([])
+const children = ref<T[]>([])
 
 const emits = defineEmits([
   'update:modelValue',
@@ -48,7 +49,7 @@ const model   = useVModel(props, 'modelValue', emits)
 const options = useVModel(props, 'options', emits)
 
 // selected node
-const selectedNode = ref(undefined)
+const selectedNode = ref<string[]>([])
 
 const isLoading = ref(false)
 
@@ -67,11 +68,9 @@ const getLabel = (option: T) => {
 }
 
 const treeTitle = computed(() => {
-  if (Array.isArray(props.title)) return props.title[props.index]
-
   if (typeof props.title === 'string') return props.title
 
-  return ''
+  if (Array.isArray(props.title)) return props.title[props.index]
 })
 
 // FIXME: need perfomance improvement
@@ -86,7 +85,7 @@ const addDataToChild = (arr: T[], id: string | number, children: T[]) => {
 }
 
 const onClick = async (item: T) => {
-  selectedNode.value = props.node ? `${props.node}.${getValue(item)}` : getValue(item)
+  selectedNode.value = [...props.node, getValue(item)]
 
   if (!item.has_children) return
 
@@ -100,7 +99,7 @@ const onClick = async (item: T) => {
 
   if (props.onFetch) {
     isLoading.value = true
-    children.value  = await props.onFetch(item) as any
+    children.value  = await props.onFetch(item) as UnwrapRef<T[]>
 
     selectAllChildren(item, children.value)
 
@@ -122,14 +121,6 @@ const items = computed(() => {
   return props.options
 })
 
-const canSelectAll = computed(() => {
-  return !items.value.every((selected) => model.value.includes(selected))
-})
-
-const onSelectAll = () => {
-  emits('update:modelValue', [...model.value, ...items.value])
-}
-
 const onCheckbox = (value: boolean, item: T) => {
   let childrenValues: Array<string | number> = []
 
@@ -150,19 +141,49 @@ const onCheckbox = (value: boolean, item: T) => {
 
   model.value = model.value.filter((selected) => !childrenValues.includes(selected) && selected !== itemValue)
 }
+
+const isSelectedAll  = computed(() => items.value.every((selected) => model.value.includes(selected)))
+const isNoneSelected = computed(() => !items.value.some((selected) => model.value.includes(selected)))
+
+watch(isSelectedAll, (value) => {
+  if (value && props.node.length > 0) {
+    const lastNode = props.node.at(-1) as string | number
+
+    if (!model.value.includes(lastNode)) model.value = [...model.value, lastNode]
+  }
+})
+
+watch(isNoneSelected, (value) => {
+  if (value && props.node.length > 0) {
+    const lastNode = props.node.at(-1) as string | number
+
+    if (model.value.includes(lastNode)) model.value = model.value.filter((selected) => selected !== lastNode)
+  }
+})
+
+const toggleSelectAll = () => {
+  if (isSelectedAll.value) {
+    model.value = model.value.filter((selected) => !items.value.includes(selected))
+
+    return
+  }
+
+  model.value =  [...model.value, ...items.value]
+}
 </script>
 
 <template>
-  <div class="w-80 h-[500px] overflow-y-auto">
+  <div
+    v-if="options.length > 0"
+    class="w-80 h-[500px] overflow-y-auto">
     <div class="flex justify-between p-3 mb-2">
       <div class="font-semibold text-gray-55">
         {{ treeTitle }}
       </div>
       <div
-        v-if="canSelectAll"
         class="text-sm text-red-30 cursor-pointer"
-        @click="onSelectAll">
-        Select All
+        @click="toggleSelectAll">
+        {{ isSelectedAll ? 'Deselect All' : 'Select All' }}
       </div>
     </div>
     <p-list-group flush>

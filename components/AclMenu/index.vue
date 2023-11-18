@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
+import type { UnwrapRef } from 'vue'
 import Tree from './Tree.vue'
 
 const props = withDefaults(
@@ -21,7 +22,7 @@ const props = withDefaults(
 // eslint-disable-next-line func-call-spacing
 const emits = defineEmits<{
   (e: 'update:modelValue', value: Array<string | number>): void,
-  (e: 'fetch', option?: Record<string, any>): Record<string, any>,
+  (e: 'fetch', option?: T): T[],
 }>()
 
 const model = useVModel(props, 'modelValue', emits)
@@ -54,7 +55,7 @@ const getValues = (data: T[] | undefined) => {
 
 onMounted(async () => {
   if (props.onFetch && typeof props.onFetch === 'function')
-    options.value = await props.onFetch() as any
+    options.value = await props.onFetch() as UnwrapRef<T[]>
 })
 </script>
 

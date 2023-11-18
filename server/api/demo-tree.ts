@@ -5,10 +5,8 @@ export default defineEventHandler(async (event) => {
   const { id } = getQuery(event)
 
   // simulasi internet lambat
-  await promiseTimeout(2000)
+  await promiseTimeout(1000)
 
-  if (id)
-    return dummy.filter((item) => item.parent_id === Number(id))
-
-  return dummy.filter((item) => item.parent_id === null)
+  // eslint-disable-next-line unicorn/no-null
+  return dummy.filter((item) => item.parent_id === (id ? Number(id) : null))
 })
