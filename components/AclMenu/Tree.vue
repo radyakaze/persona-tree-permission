@@ -84,10 +84,10 @@ const addDataToChild = (arr: T[], id: string | number, children: T[]) => {
   }
 }
 
-const onClick = async (item: T) => {
-  selectedNode.value = [...props.node, getValue(item)]
-
+const onOpenChildren = async (item: T) => {
   if (!item.has_children) return
+
+  selectedNode.value = [...props.node, getValue(item)]
 
   if (item.children) {
     selectAllChildren(item, item.children)
@@ -112,7 +112,7 @@ const onClick = async (item: T) => {
 
 const selectAllChildren = (item: T, children: T[]) => {
   if (model.value.includes(getValue(item)))
-    model.value = [...model.value, ...children.map((element) => getValue(element))]
+    emits('update:modelValue', [...new Set([...model.value, ...children.map((element) => getValue(element))])])
 }
 
 const items = computed(() => {
@@ -201,7 +201,7 @@ const checkIndeterminate = (item: T) => {
         :key="`item-${item.id}`"
         v-memo="[item, model]"
         :class="['hover:bg-subtle', { 'cursor-pointer': item.has_children }]"
-        @click="onClick(item)">
+        @click="onOpenChildren(item)">
         <span class="flex items-center justify-between">
           <span @click.stop.prevent>
             <p-checkbox
