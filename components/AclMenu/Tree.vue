@@ -114,7 +114,7 @@ const onOpenChildren = async (item: T) => {
 
 const selectAllChildren = (item: T, children: T[]) => {
   if (model.value.includes(getValue(item)))
-    emits('update:modelValue', removeDuplicateArray([...model.value, ...children.map((element) => getValue(element))]))
+    model.value = removeDuplicateArray([...model.value, ...children.map((element) => getValue(element))])
 }
 
 const items = computed(() => {
@@ -151,7 +151,7 @@ watch(isSelectedAll, (value) => {
   if (value && props.node.length > 0 && props.node.at(-1)) {
     const lastNode = props.node.at(-1) as string | number
 
-    emits('update:modelValue', removeDuplicateArray([...model.value, lastNode]))
+    model.value = removeDuplicateArray([...model.value, lastNode])
   }
 })
 
@@ -159,18 +159,18 @@ watch(isNoneSelected, (value) => {
   if (value && props.node.length > 0 && props.node.at(-1)) {
     const lastNode = props.node.at(-1) as string | number
 
-    emits('update:modelValue', model.value.filter((selected) => selected !== lastNode))
+    model.value = model.value.filter((selected) => selected !== lastNode)
   }
 })
 
 const toggleSelectAll = () => {
   if (isSelectedAll.value) {
-    emits('update:modelValue', model.value.filter((selected) => !items.value.includes(selected)))
+    model.value = model.value.filter((selected) => !items.value.includes(selected))
 
     return
   }
 
-  emits('update:modelValue', removeDuplicateArray([...model.value, ...items.value]))
+  model.value = removeDuplicateArray([...model.value, ...items.value])
 }
 
 const checkIndeterminate = (item: T) => {
