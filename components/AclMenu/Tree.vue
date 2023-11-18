@@ -129,7 +129,7 @@ const onCheckbox = (value: boolean, item: T) => {
   if (item.children)
     childrenValues = item.children.map((element: T) => getValue(element))
 
-  if (value) {
+  if (value || checkIndeterminate(item)) {
     model.value = [
       ...model.value,
       ...childrenValues,
