@@ -163,12 +163,12 @@ watch(isNoneSelected, (value) => {
 
 const toggleSelectAll = () => {
   if (isSelectedAll.value) {
-    model.value = model.value.filter((selected) => !items.value.includes(selected))
+    emits('update:modelValue', model.value.filter((selected) => !items.value.includes(selected)))
 
     return
   }
 
-  model.value =  [...model.value, ...items.value]
+  emits('update:modelValue', [...new Set([...model.value, ...items.value])])
 }
 
 const checkIndeterminate = (item: T) => {
