@@ -145,19 +145,18 @@ const onCheckbox = (value: boolean, item: T) => {
 const isSelectedAll  = computed(() => items.value.every((selected) => model.value.includes(selected)))
 const isNoneSelected = computed(() => !items.value.some((selected) => model.value.includes(selected)))
 
-watch(isSelectedAll, (value) => {
-  if (value && props.node.length > 0) {
+watch(model, () => {
+  if (props.node.length > 0 && props.node.at(-1)) {
     const lastNode = props.node.at(-1) as string | number
 
-    if (!model.value.includes(lastNode)) model.value = [...model.value, lastNode]
-  }
-})
+    if (isNoneSelected.value) {
+      if (model.value.includes(lastNode)) model.value = model.value.filter((selected) => selected !== lastNode)
 
-watch(isNoneSelected, (value) => {
-  if (value && props.node.length > 0) {
-    const lastNode = props.node.at(-1) as string | number
+      return
+    }
 
-    if (model.value.includes(lastNode)) model.value = model.value.filter((selected) => selected !== lastNode)
+    if (isSelectedAll.value)
+      model.value = [...model.value, lastNode]
   }
 })
 
