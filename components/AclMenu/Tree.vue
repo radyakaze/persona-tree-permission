@@ -53,6 +53,8 @@ const selectedNode = ref<string[]>([])
 
 const isLoading = ref(false)
 
+const removeDuplicateArray = (item: Array<string | number>) => [...new Set(item)]
+
 const getValue = (option: T) => {
   if (props.valueAttribute)
     return option[props.valueAttribute]
@@ -112,7 +114,7 @@ const onOpenChildren = async (item: T) => {
 
 const selectAllChildren = (item: T, children: T[]) => {
   if (model.value.includes(getValue(item)))
-    emits('update:modelValue', [...new Set([...model.value, ...children.map((element) => getValue(element))])])
+    emits('update:modelValue', removeDuplicateArray([...model.value, ...children.map((element) => getValue(element))]))
 }
 
 const items = computed(() => {
@@ -130,11 +132,11 @@ const onCheckbox = (value: boolean, item: T) => {
     childrenValues = item.children.map((element: T) => getValue(element))
 
   if (value || checkIndeterminate(item)) {
-    model.value = [
+    model.value = removeDuplicateArray([
       ...model.value,
       ...childrenValues,
       itemValue,
-    ]
+    ])
 
     return
   }
@@ -149,7 +151,7 @@ watch(isSelectedAll, (value) => {
   if (value && props.node.length > 0 && props.node.at(-1)) {
     const lastNode = props.node.at(-1) as string | number
 
-    emits('update:modelValue', [...model.value, lastNode])
+    emits('update:modelValue', removeDuplicateArray([...model.value, lastNode]))
   }
 })
 
@@ -168,7 +170,7 @@ const toggleSelectAll = () => {
     return
   }
 
-  emits('update:modelValue', [...new Set([...model.value, ...items.value])])
+  emits('update:modelValue', removeDuplicateArray([...model.value, ...items.value]))
 }
 
 const checkIndeterminate = (item: T) => {
