@@ -145,18 +145,19 @@ const onCheckbox = (value: boolean, item: T) => {
 const isSelectedAll  = computed(() => items.value.every((selected) => model.value.includes(selected)))
 const isNoneSelected = computed(() => !items.value.some((selected) => model.value.includes(selected)))
 
-watch(model, () => {
-  if (props.node.length > 0 && props.node.at(-1)) {
+watch(isSelectedAll, (value) => {
+  if (value && props.node.length > 0 && props.node.at(-1)) {
     const lastNode = props.node.at(-1) as string | number
 
-    if (isNoneSelected.value) {
-      if (model.value.includes(lastNode)) model.value = model.value.filter((selected) => selected !== lastNode)
+    emits('update:modelValue', [...model.value, lastNode])
+  }
+})
 
-      return
-    }
+watch(isNoneSelected, (value) => {
+  if (value && props.node.length > 0 && props.node.at(-1)) {
+    const lastNode = props.node.at(-1) as string | number
 
-    if (isSelectedAll.value)
-      model.value = [...model.value, lastNode]
+    emits('update:modelValue', model.value.filter((selected) => selected !== lastNode))
   }
 })
 
@@ -168,6 +169,15 @@ const toggleSelectAll = () => {
   }
 
   model.value =  [...model.value, ...items.value]
+}
+
+const checkIndeterminate = (item: T) => {
+  if (item.children) {
+    const childrenValues = item.children.map((element: T) => getValue(element))
+
+    return model.value.some((selected) => childrenValues.includes(selected))
+      && !childrenValues.every((selected) => model.value.includes(selected))
+  }
 }
 </script>
 
@@ -197,6 +207,7 @@ const toggleSelectAll = () => {
             <p-checkbox
               v-model="model"
               :value="getValue(item)"
+              :indeterminate="checkIndeterminate(item)"
               @change="($event) => onCheckbox($event, item)">
               {{ getLabel(item) }}
             </p-checkbox>
