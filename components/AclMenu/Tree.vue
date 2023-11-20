@@ -181,6 +181,10 @@ const checkIndeterminate = (item: T) => {
       && !childrenValues.every((selected) => model.value.includes(selected))
   }
 }
+
+watch(() => props.node, () => {
+  children.value = []
+})
 </script>
 
 <template>
